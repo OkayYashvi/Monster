@@ -188,3 +188,81 @@ class Werewolf(Wolf):
         Returns the werewolf's current power based on its form.
         '''
         return self._base_power
+
+
+
+
+class Slime(Monster):
+    '''
+    A Slime that can combine with other slimes.
+    '''
+    def __init__(self, inner_slime1=None, inner_slime2=None):
+        base_power = 1
+        base_health = 1
+        
+        if inner_slime1:
+            base_power += inner_slime1.get_power() * 2
+            base_health += inner_slime1.health * 2
+        if inner_slime2:
+            base_power += inner_slime2.get_power() * 2
+            base_health += inner_slime2.health * 2
+            
+        super().__init__(base_health, base_power)
+        self._inner_slime1 = inner_slime1
+        self._inner_slime2 = inner_slime2
+
+    def attack(self, monster):
+        '''
+        Attacks another monster if this slime is alive.
+        '''
+        if not self.is_alive():
+            raise NotAliveException("Slime is dead and cannot attack.")
+        if monster.is_alive():
+            monster.health -= self.get_power()
+            print(f"{self} attacks {monster}")
+            if not monster.is_alive():
+                print(f"{monster} has died")
+        else:
+            print(f"{monster} is already dead")
+
+    def split(self):
+        '''
+        Returns the inner slimes when this slime dies.
+        '''
+        return [slime for slime in [self._inner_slime1, self._inner_slime2] if slime is not None]
+
+    def join(self, other_slime):
+        '''
+        Creates a new slime by combining with another slime.
+        '''
+        return Slime(self, other_slime)
+
+class GelatinousCube(Slime):
+    '''
+    A Gelatinous Cube that absorbs the power of monsters it kills.
+    '''
+    def __init__(self, inner_slime1=None, inner_slime2=None):
+        super().__init__(inner_slime1, inner_slime2)
+        self._absorbed_power = 0
+
+    def get_power(self):
+        '''
+        Returns the cube's total power including absorbed power.
+        '''
+        return self._base_power + self._absorbed_power
+
+    def attack(self, monster):
+        '''
+        Attacks another monster and absorbs its power if killed.
+        '''
+        if not self.is_alive():
+            raise NotAliveException("Gelatinous Cube is dead and cannot attack.")
+        if monster.is_alive():
+            initial_health = monster.health
+            monster.health -= self.get_power()
+            print(f"{self} attacks {monster}")
+            if not monster.is_alive():
+                self._absorbed_power += monster.get_power()
+                print(f"{monster} has died and its power was absorbed")
+        else:
+            print(f"{monster} is already dead")
