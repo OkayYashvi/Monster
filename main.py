@@ -266,3 +266,37 @@ class GelatinousCube(Slime):
                 print(f"{monster} has died and its power was absorbed")
         else:
             print(f"{monster} is already dead")
+
+
+class Laboratory:
+    '''
+    Contains methods for conducting monster experiments.
+    '''
+    @staticmethod
+    def fight(wolfpack, slimes):
+        '''
+        Conducts a fight between a WolfPack and a list of slimes.
+        '''
+        wolves = wolfpack.get_living_wolves()
+        living_slimes = [s for s in slimes if s.is_alive()]
+
+        while wolves and living_slimes:
+            wolf = wolves[0]
+            slime = living_slimes[0]
+
+            wolf.attack(slime)
+            if not slime.is_alive():
+                living_slimes.remove(slime)
+                new_slimes = slime.split()
+                living_slimes.extend(new_slimes)
+
+            if living_slimes:
+                slime = living_slimes[0]
+                slime.attack(wolf)
+                if not wolf.is_alive():
+                    wolves.remove(wolf)
+
+            print(f"Status: {len(wolves)} wolves vs {len(living_slimes)} slimes")
+
+        winner = "WolfPack" if wolves else "Slimes"
+        print(f"{winner} win the battle!")
